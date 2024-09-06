@@ -1,9 +1,8 @@
 package chonker
 
 import (
-	"fmt"
-
 	"github.com/VictoriaMetrics/metrics"
+	"github.com/wazazaby/vimebu/v2"
 )
 
 // StatsForNerds exposes Prometheus metrics for chonker requests.
@@ -48,29 +47,32 @@ type hostMetrics struct {
 
 func getHostMetrics(host string) *hostMetrics {
 	return &hostMetrics{
-		requestsFetching: StatsForNerds.GetOrCreateGauge(
-			fmt.Sprintf(`chonker_http_requests_fetching{host="%s"}`, host), nil,
-		),
-		requestsTotal: StatsForNerds.GetOrCreateCounter(
-			fmt.Sprintf(`chonker_http_requests_total{host="%s"}`, host),
-		),
-		requestsTotalSansRange: StatsForNerds.GetOrCreateCounter(
-			fmt.Sprintf(`chonker_http_requests_total{host="%s",range="false"}`, host),
-		),
-		requestChunksFetchingStageDo: StatsForNerds.GetOrCreateGauge(
-			fmt.Sprintf(`chonker_http_request_chunks_fetching{host="%s",stage="do"}`, host), nil,
-		),
-		requestChunksFetchingStageCopy: StatsForNerds.GetOrCreateGauge(
-			fmt.Sprintf(`chonker_http_request_chunks_fetching{host="%s",stage="copy"}`, host), nil,
-		),
-		requestChunksTotal: StatsForNerds.GetOrCreateCounter(
-			fmt.Sprintf(`chonker_http_request_chunks_total{host="%s"}`, host),
-		),
-		requestChunkDurationSeconds: StatsForNerds.GetOrCreateHistogram(
-			fmt.Sprintf(`chonker_http_request_chunk_duration_seconds{host="%s"}`, host),
-		),
-		requestChunkBytes: StatsForNerds.GetOrCreateHistogram(
-			fmt.Sprintf(`chonker_http_request_chunk_bytes{host="%s"}`, host),
-		),
+		requestsFetching: vimebu.Metric("chonker_http_requests_fetching").
+			LabelString("host", host).
+			GetOrCreateGaugeInSet(StatsForNerds, nil),
+		requestsTotal: vimebu.Metric("chonker_http_requests_total").
+			LabelString("host", host).
+			GetOrCreateCounterInSet(StatsForNerds),
+		requestsTotalSansRange: vimebu.Metric("chonker_http_requests_total").
+			LabelString("host", host).
+			LabelString("range", "false").
+			GetOrCreateCounterInSet(StatsForNerds),
+		requestChunksFetchingStageDo: vimebu.Metric("chonker_http_request_chunks_fetching").
+			LabelString("host", host).
+			LabelString("stage", "do").
+			GetOrCreateGaugeInSet(StatsForNerds, nil),
+		requestChunksFetchingStageCopy: vimebu.Metric("chonker_http_request_chunks_fetching").
+			LabelString("host", host).
+			LabelString("stage", "copy").
+			GetOrCreateGaugeInSet(StatsForNerds, nil),
+		requestChunksTotal: vimebu.Metric("chonker_http_request_chunks_total").
+			LabelString("host", host).
+			GetOrCreateCounterInSet(StatsForNerds),
+		requestChunkDurationSeconds: vimebu.Metric("chonker_http_request_chunk_duration_seconds").
+			LabelString("host", host).
+			GetOrCreateHistogramInSet(StatsForNerds),
+		requestChunkBytes: vimebu.Metric("chonker_http_request_chunk_bytes").
+			LabelString("host", host).
+			GetOrCreateHistogramInSet(StatsForNerds),
 	}
 }
